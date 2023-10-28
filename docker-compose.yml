@@ -1,0 +1,39 @@
+version: '3'
+services:
+    php:
+        build: .
+        network_mode: host
+        container_name: easytest-php
+        volumes:
+            - .:/var/www
+        ports:
+            - '8000:8000'
+    mydb:
+        container_name: 'easytest'
+        network_mode: host
+        image: postgres:9.6
+        ports:
+            - '5432:5432'
+        environment:
+            - POSTGRES_HOST_AUTH_METHOD=trust
+            - POSTGRES_PASSWORD=draganapass
+            - POSTGRES_DB_USER=postgres
+            - POSTGRES_DB_PASSWORD=dragana
+            - POSTGRES_DB_HOST=db
+            - POSTGRES_DB_PORT=5432
+        volumes:
+            - ./postgres-data:/var/lib/postgresql/data
+            - ./setup_test_database.sh:/docker-entrypoint-initdb.d/setup_test_database.sh
+    pgadmin:
+        container_name: pgadmin_container
+        network_mode: host
+        ports:
+            - 5051:5051
+        image: dpage/pgadmin4:5.4
+        restart: always
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=dragana@example.com
+            - PGADMIN_DEFAULT_PASSWORD=draganapass
+            - PGADMIN_LISTEN_PORT=5051
+        volumes:
+            - ./pgadmin:/root/.pgadmin
