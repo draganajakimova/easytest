@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Currencies;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CurrencyController extends Controller
 {
@@ -15,6 +16,13 @@ class CurrencyController extends Controller
 
     public function getAll(Request $request)
     {
-        return $this->service->getAll();
+        $validator = Validator::make($request->all(), [
+            'currency' => 'filled|string|exists:currencies,code'
+        ]);
+
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
+        }
+        return $this->service->getAll($request->all());
     }
 }

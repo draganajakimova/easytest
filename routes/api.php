@@ -20,4 +20,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function ($api) {
     $api->group(['prefix' => 'currencies'], function ($api) {
         $api->get('/', 'Currencies\CurrencyController@getAll');
     });
+
+    $api->group(['prefix' => 'convert'], function ($api) {
+        $api->post('/', 'Conversion\ConversionController@convertCurrency');
+    });
 });

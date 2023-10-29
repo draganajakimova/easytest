@@ -13,8 +13,14 @@ class CurrencyService
         $this->model = $model;
     }
 
-    public function getAll()
+    public function getAll(array $request_data)
     {
-        return $this->model->select('uuid', 'code', 'name')->get();
+        $currencies = $this->model::query();
+
+        if (isset($request_data['currency'])) {
+            $currencies->where('code', $request_data['currency']);
+        }
+
+        return $currencies->select('uuid', 'code', 'name')->get();
     }
 }
