@@ -232,4 +232,6 @@ return [
 
     ],
 
+    'fixer_url' => env('FIXER_API_URL', null),
+    'fixer_api_key' => env('FIXER_API_KEY', null),
 ];

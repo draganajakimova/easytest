@@ -16,10 +16,10 @@ services:
             - '5432:5432'
         environment:
             - POSTGRES_HOST_AUTH_METHOD=trust
-            - POSTGRES_PASSWORD=draganapass
+            - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB_USER=postgres
-            - POSTGRES_DB_PASSWORD=dragana
-            - POSTGRES_DB_HOST=db
+            - POSTGRES_DB_PASSWORD=postgres
+            - POSTGRES_DB_HOST=127.0.0.1
             - POSTGRES_DB_PORT=5432
         volumes:
             - ./postgres-data:/var/lib/postgresql/data
@@ -33,7 +33,7 @@ services:
         restart: always
         environment:
             - PGADMIN_DEFAULT_EMAIL=dragana@example.com
-            - PGADMIN_DEFAULT_PASSWORD=draganapass
+            - PGADMIN_DEFAULT_PASSWORD=postgres
             - PGADMIN_LISTEN_PORT=5051
         volumes:
             - ./pgadmin:/root/.pgadmin
