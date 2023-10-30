@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Conversion;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Conversion\Models\Conversion;
 use App\Http\Controllers\Currencies\Models\Currency;
 use App\Http\Controllers\Fixer\FixerService;
@@ -19,32 +18,48 @@ class ConversionService
 
     public function convertCurrency(array $request_data)
     {
-        $source_currency = $request_data['source_currency'];
-        $target_currency = $request_data['target_currency'];
-        $source_currency_value = $request_data['value'];
+        $sourceCurrency = $request_data['source_currency']; // This is only for better readability
+        $targetCurrency = $request_data['target_currency'];
+        $sourceCurrencyValue = $request_data['value'];
 
-        $source_currency_rate = $this->fixerService->proxy('GET', 'latest&base='.$target_currency.'&symbols='.$source_currency);
+        // Fetch the exchange rate from the Fixer API
+        $exchangeRate = $this->fetchExchangeRate($sourceCurrency, $targetCurrency);
 
-        if ($source_currency_rate['success']) {
-            $exchange_rate = $source_currency_rate['rates'][$source_currency];
+        if ($exchangeRate) {
+            $targetCurrencyValue = round($sourceCurrencyValue / $exchangeRate, 2);
 
-            $target_currency_value = $source_currency_value / $exchange_rate;
+            // Create a new conversion record
+            $this->createConversionRecord($sourceCurrency, $targetCurrency, $sourceCurrencyValue, $targetCurrencyValue, $exchangeRate);
 
-            Conversion::create([
-                'source_currency_id' => $this->currencyModel->where('code', $request_data['source_currency'])->value('id'),
-                'target_currency_id' =>  $this->currencyModel->where('code', $request_data['target_currency'])->value('id'),
-                'source_currency_value' => $source_currency_value,
-                'target_currency_value' => $target_currency_value,
-                'exchange_rate' => $exchange_rate
-            ]);
-
-            // Return formatted with relevant information response
+            // Return a formatted response
             return response()->json([
                 'message' => 'Successfully converted!',
-                'converted_amount' => round($target_currency_value, 2)
-            ],201);
+                'converted_amount' => $targetCurrencyValue
+            ], 201);
         }
 
         return null;
+    }
+
+    private function fetchExchangeRate($sourceCurrency, $targetCurrency)
+    {
+        $exchangeRateData = $this->fixerService->proxy('GET', "latest&base=$targetCurrency&symbols=$sourceCurrency");
+
+        if ($exchangeRateData['success']) {
+            return $exchangeRateData['rates'][$sourceCurrency];
+        }
+
+        return null;
+    }
+
+    private function createConversionRecord($sourceCurrency, $targetCurrency, $sourceCurrencyValue, $targetCurrencyValue, $exchangeRate)
+    {
+        Conversion::create([
+            'source_currency_id' => $this->currencyModel->where('code', $sourceCurrency)->value('id'),
+            'target_currency_id' => $this->currencyModel->where('code', $targetCurrency)->value('id'),
+            'source_currency_value' => $sourceCurrencyValue,
+            'target_currency_value' => $targetCurrencyValue,
+            'exchange_rate' => $exchangeRate
+        ]);
     }
 }
