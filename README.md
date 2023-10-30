@@ -27,6 +27,7 @@ Before you begin, make sure you have the following installed on your system:
     git clone <repository_url>
     cd <repository_directory>
     ```
+All the code is pushed on `master` branch
 
 ### Running the Application
 
